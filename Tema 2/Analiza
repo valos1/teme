@@ -1,0 +1,25 @@
+stack_pool aloca memorie pe stack, ceea ce face ca locatiile datelor sa fie apropiate de locatiile instructiunilor. 
+Astfel, se produc mai putine cache misses pe nivelele L3 si L2 ale cache-ului procesorului, 
+acestea fiind folosite si pentru date si pentru instructiuni, 
+spre deosebire de L1 care e impartit in L1i si L1d. 
+Singura conditie este ca numarul maxim de elemente ce pot fi alocate deodata sa fie stiut la compilare ca sa poata fi dat ca parametru template.
+
+Clasa are array-ul de date si un array de indici liberi ce fac referire la primul array. alocarea/dealocarea se face pe cate un element prin functia allocate/deallocate. 
+allocate returneaza adresa unui element liber si scoate indicele lui din array-ul de indici liberi.
+deallocate primeste argument adresa unui element ce trebuie sters. 
+
+In constructor se initializeaza array-ul de indici liberi.
+
+La heap_pool, se prealoca memoria pentru cele 2 array-uri in constructor si se initializeaza cel de indici. 
+In aceeasi maniera ca la stack_pool se fac alocarea si dealocarea. Se poate folosi daca nu este stiut numarul maxim de element la compilare sau daca nu mai e loc pe stack.
+
+Complexitatile timp si spatiu ale operatiilor de alocare si dealocare sunt O(1).
+
+Am folosit un variadic template in caz ca se vrea construirea de elemente cu anumite argumente date la un constructor. 
+Un avantaj important la construire il are heap_pool deoarece daca un element nu a fost construit inca, 
+ci doar alocat, emplace_back va construi elementul cu argumentele date prin std::forward in memorie, 
+fara copieri sau mutari. Daca a fost deja creat inainte obiectul, se va folosi operator=(T&&) al lui T pe obiectul temporar creat prin T{std::forward<U>(args)...}. 
+La stack_alloc, operator=(T&&) e mereu folosit. Pentru obiecte greu de construit, dar care ocupa putina memorie, heap_pool ar putea fi alegerea mai buna.
+
+Aceste pool-uri ar putea fi folosite in contextul de smart pointers, functiile de alocare si dealocare dandu-se in constructorii lor.
+
